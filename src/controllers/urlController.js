@@ -104,4 +104,38 @@ const redirectUrl = async (req, res) => {
     }
 };
 
-module.exports = { shortenUrl,redirectUrl, };
+const getUrlStats = async (req, res) => {
+    const shortCode = req.params.short_code;
+
+    try {
+        const urlResult = await pool.query(
+            'SELECT * FROM urls WHERE short_code = $1',
+            [shortCode]
+        );
+
+        if (urlResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Kısa URL bulunamadı.' });
+        }
+
+        const url = urlResult.rows[0];
+
+        const analyticsResult = await pool.query(
+            'SELECT clicked_at, ip_address, user_agent, referer FROM analytics WHERE url_id = $1 ORDER BY clicked_at DESC',
+            [url.id]
+        );
+
+        return res.status(200).json({
+            short_code: url.short_code,
+            original_url: url.original_url,
+            click_count: url.click_count,
+            created_at: url.created_at,
+            analytics: analyticsResult.rows,
+        });
+    } catch (err) {
+        console.error('İstatistik getirirken hata:', err);
+        return res.status(500).json({ error: 'Sunucu hatası.' });
+    }
+};
+
+
+module.exports = { shortenUrl,redirectUrl, getUrlStats, };
