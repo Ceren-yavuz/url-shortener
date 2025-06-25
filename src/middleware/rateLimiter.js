@@ -1,7 +1,7 @@
 const redisClient = require('../config/redis');
 
 const RATE_LIMIT = 5; // saniyede en fazla 5 istek
-const WINDOW_SIZE = 1; // saniye
+const WINDOW_SIZE = 5; // saniye
 
 const rateLimiter = async (req, res, next) => {
     try {
