@@ -1,5 +1,6 @@
 const { encodeBase62 } = require('../utils/shortCodeGenerator');
 const pool = require('../config/database'); // 🔧 burada düzeltildi
+const { saveAnalytics } = require('../models/analyticsModel');
 require('dotenv').config();
 
 let idCounter = 1;
@@ -86,6 +87,13 @@ const redirectUrl = async (req, res) => {
             'UPDATE urls SET click_count = click_count + 1 WHERE id = $1',
             [urlData.id]
         );
+
+        await saveAnalytics({
+            urlId: urlData.id,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            referer: req.get('Referer') || 'direct'
+        });
 
         // Redirect et
         return res.redirect(urlData.original_url);
