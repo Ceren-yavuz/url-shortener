@@ -9,7 +9,8 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
-
+const urlRoutes = require('./routes/urlRoutes');
+app.use('/api', urlRoutes);
 // Geçici anasayfa route
 app.get('/', (req, res) => {
     res.send('URL Shortener Service is running!');
